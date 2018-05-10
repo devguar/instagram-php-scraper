@@ -19,14 +19,13 @@ class Endpoints
     const LAST_LIKES_BY_CODE = 'ig_shortcode({{code}}){likes{nodes{id,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
     const LIKES_BY_SHORTCODE = 'https://www.instagram.com/graphql/query/?query_id=17864450716183058&variables={"shortcode":"{{shortcode}}","first":{{count}},"after":"{{likeId}}"}';
     const FOLLOWING_URL = 'https://www.instagram.com/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}&after={{after}}';
-    const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}&after={{after}}';
+    const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_hash=37479f2b8209594dde7facb0d904896a&variables={{jsonvariables}}';
     const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
     const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
     const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
     const USER_FEED2 = 'https://www.instagram.com/?__a=1';
     const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
     const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
-    const ACCOUNT_JSON_PRIVATE_INFO_BY_ID = 'https://i.instagram.com/api/v1/users/{userId}/info/';
 
     const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
 
@@ -63,11 +62,6 @@ class Endpoints
     public static function getAccountJsonInfoLinkByAccountId($id)
     {
         return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_INFO_BY_ID);
-    }
-
-    public static function getAccountJsonPrivateInfoLinkByAccountId($id)
-    {
-        return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_PRIVATE_INFO_BY_ID);
     }
 
     public static function getAccountMediasJsonLink($variables)
@@ -142,14 +136,18 @@ class Endpoints
 
     public static function getFollowersJsonLink($accountId, $count, $after = '')
     {
-        $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWERS_URL);
-        $url = str_replace('{{count}}', urlencode($count), $url);
+        $variables = array(
+            "id"=>$accountId,
+            "first"=>$count
+        );
 
-        if ($after === '') {
-            $url = str_replace('&after={{after}}', '', $url);
-        } else {
-            $url = str_replace('{{after}}', urlencode($after), $url);
+        if ($after){
+            $variables['after'] = $after;
         }
+
+        $parameters = json_encode($variables);
+
+        $url = str_replace('{{jsonvariables}}', $parameters, static::FOLLOWERS_URL);
 
         return $url;
     }
